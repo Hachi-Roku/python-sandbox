@@ -37,32 +37,8 @@ async def processed_image(request: Request, file: UploadFile, shift: int = Form(
     # Encode the processed image as base64
     processed_image_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-    # Plot the color distribution graph for all color channels
-    plt.figure()
-    colors = ['red', 'green', 'blue']
-    channel_names = ['Red', 'Green', 'Blue']
-
-    for channel, color in enumerate(colors):
-        plt.hist(
-            image_np[:, :, channel].ravel(),
-            bins=256,
-            color=color,
-            alpha=0.6,
-            label=f'{channel_names[channel]} Channel'
-        )
-
-    plt.legend()
-    plt.xlabel("Value")
-    plt.ylabel("Frequency")
-    plt.title("Color Distribution")
-
-    # Save the graph to a BytesIO buffer
-    graph_buffer = io.BytesIO()
-    plt.savefig(graph_buffer, format="PNG")
-    graph_buffer.seek(0)
-
     # Encode the graph as base64
-    graph_base64 = base64.b64encode(graph_buffer.getvalue()).decode()
+    graph_base64 = generate_color_distribution_graph_base64(image_np)
 
     # Render the template with the base64-encoded images
     return templates.TemplateResponse(
@@ -125,3 +101,35 @@ def apply_shift(image_np, shift):
         image_np[top + 1:bottom + 1, left] = left_edge_new
 
     return image_np
+
+def generate_color_distribution_graph_base64(image_np):
+    # Create a figure for the color distribution graph
+    plt.figure()
+    colors = ['red', 'green', 'blue']
+    channel_names = ['Red', 'Green', 'Blue']
+
+    # Plot histograms for each color channel
+    for channel, color in enumerate(colors):
+        plt.hist(
+            image_np[:, :, channel].ravel(),
+            bins=256,
+            color=color,
+            alpha=0.6,
+            label=f'{channel_names[channel]} Channel'
+        )
+
+    # Add labels and title
+    plt.legend()
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
+    plt.title("Color Distribution")
+
+    # Save the graph to a BytesIO buffer
+    graph_buffer = io.BytesIO()
+    plt.savefig(graph_buffer, format="PNG")
+    graph_buffer.seek(0)
+
+    # Encode the graph as base64
+    graph_base64 = base64.b64encode(graph_buffer.getvalue()).decode()
+
+    return graph_base64
