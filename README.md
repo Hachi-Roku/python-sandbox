@@ -25,3 +25,15 @@ Python sandbox projects.
 сдвига внутренней части зависит от размера внутренней части и не должен пре-
 вышать максимального циклического сдвига по условному кругу. Нарисовать
 график распределения цветов для исходного изображения.
+
+# Activate virtual environment
+pipenv shell
+
+# Exit virtual environment
+exit
+
+# Run project
+pipenv run uvicorn src.main:app --reload OR ./start.sh
+
+# Run test
+
