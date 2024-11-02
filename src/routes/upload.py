@@ -21,13 +21,16 @@ async def upload_page(request: Request):
     return templates.TemplateResponse("upload.html", {"request": request})
 
 @upload_router.post("/processed-image", response_class=HTMLResponse)
-async def processed_image(request: Request, file: UploadFile, shift: int = Form(...)):
+async def processed_image(request: Request, file: UploadFile, shift: int = Form(...), is_v2: bool = Form(False)):
     # Open the image
     image = Image.open(file.file)
     image_np = np.array(image)
 
-    # Apply the shift to the image
-    processed_image = apply_shift(image_np, shift)
+    # Apply the selected version of the shift
+    if is_v2:
+        processed_image = apply_shift_v2(image_np, shift)
+    else:
+        processed_image = apply_shift(image_np, shift)
 
     # Save the processed image to a BytesIO buffer
     buffered = io.BytesIO()
@@ -101,6 +104,63 @@ def apply_shift(image_np, shift):
         image_np[top + 1:bottom + 1, left] = left_edge_new
 
     return image_np
+
+def apply_shift_v2(image_np, shift):
+    h, w, _ = image_np.shape
+
+    # Iterate over layers, starting from the outermost rectangle and working inward
+    for layer in range(0, min(h, w) // 2, shift):
+        # Define the boundaries of the current layer with the thickness equal to shift
+        top = layer
+        bottom = h - layer - 1
+        left = layer
+        right = w - layer - 1
+
+        if top + shift >= bottom or left + shift >= right:
+            break
+
+        # Extract the top, right, bottom, and left edges of the layer with thickness equal to shift
+        top_edge = image_np[top:top + shift, left:right + 1].copy()
+        right_edge = image_np[top + shift:bottom + 1 - shift, right:right + shift].copy()
+        bottom_edge = image_np[bottom - shift + 1:bottom + 1, left:right + 1][::-1].copy()
+        left_edge = image_np[top + shift:bottom + 1 - shift, left:left + shift][::-1].copy()
+
+        # Check if any of the edges have a size of zero and skip if necessary
+        if top_edge.size == 0 or right_edge.size == 0 or bottom_edge.size == 0 or left_edge.size == 0:
+            continue
+
+        # Concatenate the edges to form a single array representing the perimeter
+        perimeter = np.concatenate([top_edge.flatten(), right_edge.flatten(), bottom_edge.flatten(), left_edge.flatten()])
+
+        # Choose a random direction for shifting
+        direction = random.choice(["up", "down", "left", "right"])
+
+        # Perform cyclic shift on the perimeter using the specified shift amount
+        if direction in ["up", "left"]:
+            perimeter = np.roll(perimeter, -shift, axis=0)
+        else:  # "down" or "right"
+            perimeter = np.roll(perimeter, shift, axis=0)
+
+        # Split the shifted perimeter back into the four edges
+        top_edge_size = top_edge.size
+        right_edge_size = right_edge.size
+        bottom_edge_size = bottom_edge.size
+        left_edge_size = left_edge.size
+
+        # Ensure reshaping only occurs when the sizes match
+        top_edge_new = perimeter[:top_edge_size].reshape(top_edge.shape)
+        right_edge_new = perimeter[top_edge_size:top_edge_size + right_edge_size].reshape(right_edge.shape)
+        bottom_edge_new = perimeter[top_edge_size + right_edge_size:top_edge_size + right_edge_size + bottom_edge_size][::-1].reshape(bottom_edge.shape)
+        left_edge_new = perimeter[-left_edge_size:][::-1].reshape(left_edge.shape)
+
+        # Reassign the shifted values back to the image
+        image_np[top:top + shift, left:right + 1] = top_edge_new
+        image_np[top + shift:bottom + 1 - shift, right:right + shift] = right_edge_new
+        image_np[bottom - shift + 1:bottom + 1, left:right + 1] = bottom_edge_new
+        image_np[top + shift:bottom + 1 - shift, left:left + shift] = left_edge_new
+
+    return image_np
+
 
 def generate_color_distribution_graph_base64(image_np):
     # Create a figure for the color distribution graph
