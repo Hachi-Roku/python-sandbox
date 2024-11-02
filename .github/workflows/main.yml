@@ -52,5 +52,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv
 
+    - name: Install dependencies
+      run: pipenv sync --dev
+
     - name: Run tests
-      run: pipenv run pytest tests
+      run: pipenv run pytest
