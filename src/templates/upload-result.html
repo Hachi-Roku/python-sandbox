@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Результат обработки</title>
+</head>
+<body>
+    <h1>Результат обработки изображения</h1>
+    <h2>Обработанное изображение:</h2>
+    <img src="data:image/png;base64, {{ image_data }}" alt="Processed Image">
+
+    <h2>График распределения цветов:</h2>
+    <img src="data:image/png;base64, {{ graph_data }}" alt="Color Distribution Graph">
+</body>
+</html>

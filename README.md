@@ -36,4 +36,4 @@ exit
 pipenv run uvicorn src.main:app --reload OR ./start.sh
 
 # Run test
-
+pytest

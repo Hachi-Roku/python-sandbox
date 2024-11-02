@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Image</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <!-- Подключите ваш CSS, если он есть -->
+  </head>
+  <body>
+    <h1>Upload an Image</h1>
+    <form class="upload-form" action="/processed-image" method="post" enctype="multipart/form-data">
+      <div clas="form-group">
+        <label for="shift">Shift Amount (in pixels):</label>
+        <input type="number" id="shift" name="shift" min="1" required />
+      </div>
+
+      <div clas="form-group">
+        <label for="file">Select an Image:</label>
+        <input type="file" id="file" name="file" accept="image/*" required />
+      </div>
+
+      <div class="form-action">
+        <button type="submit">Upload and Transform</button>
+      </div>
+    </form>
+  </body>
+</html>
