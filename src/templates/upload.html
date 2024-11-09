@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Upload Image</title>
     <link rel="stylesheet" href="/static/styles.css" />
-    <!-- Подключите ваш CSS, если он есть -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   </head>
   <body>
     <h1>Upload an Image</h1>
-    <form class="upload-form" action="/processed-image" method="post" enctype="multipart/form-data">
+    <form
+      class="upload-form"
+      action="/processed-image"
+      method="post"
+      enctype="multipart/form-data"
+      onsubmit="return validateCaptcha()"
+    >
       <div clas="form-group">
         <label for="shift">Shift Amount (in pixels):</label>
         <input type="number" id="shift" name="shift" min="1" required />
@@ -25,9 +31,42 @@
         <input type="checkbox" id="is-v2" name="is_v2" />
       </div>
 
+      <div
+        class="g-recaptcha"
+        data-sitekey="{{recaptcha_public_key}}"
+      ></div>
+
+      <input type="hidden" name="captcha_response" id="captcha-response" />
+
       <div class="form-action">
-        <button type="submit">Upload and Transform</button>
+        <button type="submit" id="submit-btn">Upload and Transform</button>
+        <p id="loading" style="display: none">
+          Validating CAPTCHA, please wait...
+        </p>
       </div>
     </form>
+
+    <script>
+      function validateCaptcha() {
+        var response = grecaptcha.getResponse();
+        var loadingMessage = document.getElementById('loading');
+        var submitButton = document.getElementById('submit-btn');
+        var captchaResponseField = document.getElementById('captcha-response');
+
+        if (response.length === 0) {
+          alert('Please complete the CAPTCHA verification.');
+          return false; // Prevent form submission
+        }
+
+        // Saving data to hidden field
+        captchaResponseField.value = response;
+
+        // Show loading message and disable submit button
+        loadingMessage.style.display = 'block';
+        submitButton.disabled = true;
+
+        return true; // Allow form submission
+      }
+    </script>
   </body>
 </html>
