@@ -37,3 +37,9 @@ pipenv run uvicorn src.main:app --reload OR ./start.sh
 
 # Run test
 pytest
+
+# Using app
+Go to /upload-image
+Fill in the form
+Click "submit" button
+See results, click link below to upload one more or navigate yourselves
