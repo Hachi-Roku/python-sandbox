@@ -26,17 +26,23 @@ Python sandbox projects.
 вышать максимального циклического сдвига по условному кругу. Нарисовать
 график распределения цветов для исходного изображения.
 
+# Environemnt
+1. For google recaptcha v2 we need to setup 2 key-value pairs
+1.1. For local start add .env file, containing RECAPTCHA_SECRET_KEY, RECAPTCHA_PUBLIC_KEY values (using google recaptcha v2)
+1.2. For renderer.com start add same values from 1.1. Environment Variables
+
 # Activate virtual environment
-pipenv shell
+`pipenv shell`
 
 # Exit virtual environment
-exit
+`exit`
 
 # Run project
-pipenv run uvicorn src.main:app --reload OR ./start.sh
+
+2. Run `pipenv run uvicorn src.main:app --reload OR ./start.sh`
 
 # Run test
-pytest
+`pytest`
 
 # Using app
 Go to /upload-image
